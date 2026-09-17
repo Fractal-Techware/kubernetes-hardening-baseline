@@ -126,6 +126,10 @@ from [`scripts/versions.env`](scripts/versions.env). The same checks run in
 Kubernetes 1.32–1.37 (validated against 1.35 and 1.37 schemas) · Kyverno 1.19+ · EKS, GKE, AKS,
 k3s, kind and other conformant distributions.
 
+## Guides
+
+Tested walkthroughs on [https://fractal-techware.github.io/guides/](https://fractal-techware.github.io/guides/): [disallow the :latest tag](https://fractal-techware.github.io/guides/kyverno-disallow-latest-tag/), [require requests and limits](https://fractal-techware.github.io/guides/kyverno-require-requests-limits/), [Kyverno from Audit to Enforce](https://fractal-techware.github.io/guides/kyverno-audit-to-enforce/), [default-deny NetworkPolicy with DNS](https://fractal-techware.github.io/guides/kubernetes-default-deny-networkpolicy-dns/) and [Pod Security Admission restricted](https://fractal-techware.github.io/guides/pod-security-admission-restricted-migration/).
+
 ## Need the full baseline?
 
 This repository is a free sample of the
