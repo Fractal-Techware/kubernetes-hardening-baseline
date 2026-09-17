@@ -2,6 +2,7 @@
 
 [![test](https://github.com/Fractal-Techware/kubernetes-hardening-baseline/actions/workflows/test.yml/badge.svg)](https://github.com/Fractal-Techware/kubernetes-hardening-baseline/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/fractal-techware-k8s-hardening)](https://artifacthub.io/packages/search?repo=fractal-techware-k8s-hardening)
 [![Kubernetes 1.32–1.37](https://img.shields.io/badge/kubernetes-1.32--1.37-326ce5?logo=kubernetes&logoColor=white)](#compatibility)
 [![Kyverno 1.19+](https://img.shields.io/badge/kyverno-1.19%2B-ff6b35)](https://kyverno.io)
 [![kubeconform strict](https://img.shields.io/badge/kubeconform-strict-success)](scripts/kubeconform.sh)
