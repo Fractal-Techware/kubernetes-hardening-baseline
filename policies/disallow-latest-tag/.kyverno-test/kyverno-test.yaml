@@ -1,0 +1,32 @@
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: disallow-latest-tag
+policies:
+- ../disallow-latest-tag.yaml
+resources:
+- good.yaml
+- bad.yaml
+results:
+- isValidatingPolicy: true
+  policy: disallow-latest-tag
+  kind: Pod
+  resources:
+  - team-a/good-pod
+  - team-a/good-tag-only
+  - team-a/good-registry-port
+  result: pass
+- isValidatingPolicy: true
+  policy: disallow-latest-tag
+  kind: Pod
+  resources:
+  - team-a/bad-latest
+  - team-a/bad-untagged
+  - team-a/bad-registry-port-untagged
+  result: fail
+- isValidatingPolicy: true
+  policy: disallow-latest-tag
+  kind: Deployment
+  resources:
+  - team-a/bad-latest-deploy
+  result: fail

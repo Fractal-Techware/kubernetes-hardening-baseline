@@ -1,0 +1,28 @@
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: disallow-host-path
+policies:
+- ../disallow-host-path.yaml
+resources:
+- good.yaml
+- bad.yaml
+results:
+- isValidatingPolicy: true
+  policy: disallow-host-path
+  kind: Pod
+  resources:
+  - team-a/good-pod
+  result: pass
+- isValidatingPolicy: true
+  policy: disallow-host-path
+  kind: Pod
+  resources:
+  - team-a/bad-hostpath
+  result: fail
+- isValidatingPolicy: true
+  policy: disallow-host-path
+  kind: Deployment
+  resources:
+  - team-a/bad-hostpath-deploy
+  result: fail

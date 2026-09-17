@@ -1,0 +1,63 @@
+# Disallow Privileged Containers  (severity: critical, rollout: recommended)
+# Ships in Audit mode. Switch to Deny with: kubectl apply -k overlays/enforce
+# Tests: policies/disallow-privileged-containers/.kyverno-test/
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: disallow-privileged-containers
+  labels:
+    app.kubernetes.io/part-of: ftw-k8s-hardening
+    ftw.io/enforce: recommended
+  annotations:
+    policies.kyverno.io/title: Disallow Privileged Containers
+    policies.kyverno.io/category: Pod Security
+    policies.kyverno.io/severity: critical
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/minversion: 1.19.0
+    ftw.io/benchmark-cis: 5.2 Pod Security Standards - minimize admission of privileged containers
+    ftw.io/benchmark-nsa-cisa: Kubernetes Pod security - non-root / immutable containers
+    ftw.io/rollout: Audit >= 7 days -> fix PolicyReport violations -> Warn -> Deny
+    policies.kyverno.io/description: >-
+      Privileged containers get nearly all host capabilities and device access; a compromise equals node
+      takeover. Blocks securityContext.privileged=true in containers, initContainers and ephemeralContainers.
+spec:
+  validationActions:
+  - Audit
+  autogen:
+    podControllers:
+      controllers:
+      - deployments
+      - statefulsets
+      - daemonsets
+      - jobs
+      - cronjobs
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+        - kube-system
+        - kube-public
+        - kube-node-lease
+        - kyverno
+    resourceRules:
+    - apiGroups:
+      - ''
+      apiVersions:
+      - v1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - pods
+  variables:
+  - name: allContainers
+    expression: >-
+      object.spec.containers + object.spec.?initContainers.orValue([]) + object.spec.?ephemeralContainers.orValue([])
+  validations:
+  - expression: >-
+      variables.allContainers.all(c, c.?securityContext.?privileged.orValue(false) == false)
+    message: >-
+      Privileged containers are not allowed: set securityContext.privileged to false (or remove it) in
+      every container.

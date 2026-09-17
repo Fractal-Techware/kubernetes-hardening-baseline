@@ -1,0 +1,58 @@
+# Disallow hostPath Volumes  (severity: critical, rollout: recommended)
+# Ships in Audit mode. Switch to Deny with: kubectl apply -k overlays/enforce
+# Tests: policies/disallow-host-path/.kyverno-test/
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: disallow-host-path
+  labels:
+    app.kubernetes.io/part-of: ftw-k8s-hardening
+    ftw.io/enforce: recommended
+  annotations:
+    policies.kyverno.io/title: Disallow hostPath Volumes
+    policies.kyverno.io/category: Pod Security
+    policies.kyverno.io/severity: critical
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/minversion: 1.19.0
+    ftw.io/benchmark-cis: 5.2 Pod Security Standards - minimize hostPath volumes
+    ftw.io/benchmark-nsa-cisa: Kubernetes Pod security - restrict host filesystem access
+    ftw.io/rollout: Audit >= 7 days -> fix PolicyReport violations -> Warn -> Deny
+    policies.kyverno.io/description: >-
+      hostPath volumes expose the node filesystem (container runtime socket, kubelet credentials, /etc).
+      Blocks any hostPath volume.
+spec:
+  validationActions:
+  - Audit
+  autogen:
+    podControllers:
+      controllers:
+      - deployments
+      - statefulsets
+      - daemonsets
+      - jobs
+      - cronjobs
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+        - kube-system
+        - kube-public
+        - kube-node-lease
+        - kyverno
+    resourceRules:
+    - apiGroups:
+      - ''
+      apiVersions:
+      - v1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - pods
+  validations:
+  - expression: object.spec.?volumes.orValue([]).all(v, !has(v.hostPath))
+    message: >-
+      hostPath volumes are not allowed: use emptyDir, a PersistentVolumeClaim, configMap/secret or a CSI
+      volume instead.

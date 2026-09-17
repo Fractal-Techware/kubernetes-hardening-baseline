@@ -1,0 +1,16 @@
+# Phase 3: Deny. Violations are REJECTED at admission.
+# Only apply after the Audit phase shows zero unexpected violations.
+#   kubectl apply -k overlays/enforce
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../policies
+patches:
+  - target:
+      group: policies.kyverno.io
+      kind: ValidatingPolicy
+      labelSelector: ftw.io/enforce=recommended
+    patch: |-
+      - op: replace
+        path: /spec/validationActions
+        value: [Deny]

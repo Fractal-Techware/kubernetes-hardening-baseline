@@ -1,0 +1,8 @@
+# Artifact Hub repository metadata file.
+# Register this repo at https://artifacthub.io/control (kind: Kyverno policies, URL:
+# https://github.com/Fractal-Techware/kubernetes-hardening-baseline), then paste the
+# repository ID Artifact Hub shows you below to claim ownership (Verified Publisher badge).
+repositoryID: # <paste the Artifact Hub repository ID here>
+owners:
+  - name: Fractal Techware
+    # email: <the email of the Artifact Hub account that owns this repo>

@@ -1,0 +1,198 @@
+# Resources that MUST fail require-run-as-non-root
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bad-no-runasnonroot
+  namespace: team-a
+  labels:
+    app.kubernetes.io/name: good
+    app.kubernetes.io/part-of: demo
+spec:
+  automountServiceAccountToken: false
+  securityContext:
+    runAsUser: 10001
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+  - name: app
+    image: ghcr.io/example/app:1.4.2@sha256:9db7b59979c38555a39def84a31fb98b5296952f9e3afd4f6f11f05b07adfab0
+    ports:
+    - containerPort: 8080
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+        - ALL
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
+    readinessProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+    volumeMounts:
+    - name: tmp
+      mountPath: /tmp
+  volumes:
+  - name: tmp
+    emptyDir: {}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bad-container-override
+  namespace: team-a
+  labels:
+    app.kubernetes.io/name: good
+    app.kubernetes.io/part-of: demo
+spec:
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+  - name: app
+    image: ghcr.io/example/app:1.4.2@sha256:9db7b59979c38555a39def84a31fb98b5296952f9e3afd4f6f11f05b07adfab0
+    ports:
+    - containerPort: 8080
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+        - ALL
+      runAsNonRoot: false
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
+    readinessProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+    volumeMounts:
+    - name: tmp
+      mountPath: /tmp
+  volumes:
+  - name: tmp
+    emptyDir: {}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bad-uid-zero
+  namespace: team-a
+  labels:
+    app.kubernetes.io/name: good
+    app.kubernetes.io/part-of: demo
+spec:
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+  - name: app
+    image: ghcr.io/example/app:1.4.2@sha256:9db7b59979c38555a39def84a31fb98b5296952f9e3afd4f6f11f05b07adfab0
+    ports:
+    - containerPort: 8080
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+        - ALL
+      runAsUser: 0
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
+    readinessProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+    volumeMounts:
+    - name: tmp
+      mountPath: /tmp
+  volumes:
+  - name: tmp
+    emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bad-root-deploy
+  namespace: team-a
+  labels:
+    app.kubernetes.io/name: good
+    app.kubernetes.io/part-of: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: good
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: good
+        app.kubernetes.io/part-of: demo
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: app
+        image: ghcr.io/example/app:1.4.2@sha256:9db7b59979c38555a39def84a31fb98b5296952f9e3afd4f6f11f05b07adfab0
+        ports:
+        - containerPort: 8080
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            memory: 128Mi
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}

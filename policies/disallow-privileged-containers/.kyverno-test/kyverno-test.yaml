@@ -1,0 +1,29 @@
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: disallow-privileged-containers
+policies:
+- ../disallow-privileged-containers.yaml
+resources:
+- good.yaml
+- bad.yaml
+results:
+- isValidatingPolicy: true
+  policy: disallow-privileged-containers
+  kind: Pod
+  resources:
+  - team-a/good-pod
+  result: pass
+- isValidatingPolicy: true
+  policy: disallow-privileged-containers
+  kind: Pod
+  resources:
+  - team-a/bad-privileged
+  - team-a/bad-privileged-init
+  result: fail
+- isValidatingPolicy: true
+  policy: disallow-privileged-containers
+  kind: Deployment
+  resources:
+  - team-a/bad-privileged-deploy
+  result: fail

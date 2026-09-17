@@ -1,0 +1,72 @@
+# Require CPU/Memory Requests and Memory Limits  (severity: medium, rollout: recommended)
+# Ships in Audit mode. Switch to Deny with: kubectl apply -k overlays/enforce
+# Tests: policies/require-resource-requests-limits/.kyverno-test/
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: require-resource-requests-limits
+  labels:
+    app.kubernetes.io/part-of: ftw-k8s-hardening
+    ftw.io/enforce: recommended
+  annotations:
+    policies.kyverno.io/title: Require CPU/Memory Requests and Memory Limits
+    policies.kyverno.io/category: Resource Management
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/minversion: 1.19.0
+    ftw.io/benchmark-cis: 5.7 General Policies (resource governance; complements LimitRange/ResourceQuota)
+    ftw.io/benchmark-nsa-cisa: Kubernetes Pod security - denial-of-service protection with resource limits
+    ftw.io/rollout: Audit >= 7 days -> fix PolicyReport violations -> Warn -> Deny
+    policies.kyverno.io/description: >-
+      Every container and initContainer must declare cpu and memory requests and a memory limit. Unbounded
+      memory lets one pod starve a node. CPU limits are intentionally optional (they cause throttling);
+      add 'cpu' to requiredLimits to require them.
+spec:
+  validationActions:
+  - Audit
+  autogen:
+    podControllers:
+      controllers:
+      - deployments
+      - statefulsets
+      - daemonsets
+      - jobs
+      - cronjobs
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+        - kube-system
+        - kube-public
+        - kube-node-lease
+        - kyverno
+    resourceRules:
+    - apiGroups:
+      - ''
+      apiVersions:
+      - v1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - pods
+  variables:
+  - name: containers
+    expression: >-
+      object.spec.containers + object.spec.?initContainers.orValue([])
+  - name: requiredRequests
+    expression: '[''cpu'', ''memory'']'
+  - name: requiredLimits
+    expression: '[''memory'']'
+  validations:
+  - expression: >-
+      variables.containers.all(c, variables.requiredRequests.all(r, r in c.?resources.?requests.orValue({})))
+    message: >-
+      Resource requests are required: set resources.requests.cpu and resources.requests.memory on every
+      container.
+  - expression: >-
+      variables.containers.all(c, variables.requiredLimits.all(r, r in c.?resources.?limits.orValue({})))
+    message: >-
+      Resource limits are required: set resources.limits.memory on every container.

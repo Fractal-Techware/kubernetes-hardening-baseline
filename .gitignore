@@ -1,0 +1,5 @@
+.DS_Store
+.render/
+__pycache__/
+# Maintainer-only publishing notes
+PUBLISHING.md

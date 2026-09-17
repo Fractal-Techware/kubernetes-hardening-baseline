@@ -1,0 +1,31 @@
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: require-run-as-non-root
+policies:
+- ../require-run-as-non-root.yaml
+resources:
+- good.yaml
+- bad.yaml
+results:
+- isValidatingPolicy: true
+  policy: require-run-as-non-root
+  kind: Pod
+  resources:
+  - team-a/good-pod
+  - team-a/good-container-level
+  result: pass
+- isValidatingPolicy: true
+  policy: require-run-as-non-root
+  kind: Pod
+  resources:
+  - team-a/bad-no-runasnonroot
+  - team-a/bad-container-override
+  - team-a/bad-uid-zero
+  result: fail
+- isValidatingPolicy: true
+  policy: require-run-as-non-root
+  kind: Deployment
+  resources:
+  - team-a/bad-root-deploy
+  result: fail

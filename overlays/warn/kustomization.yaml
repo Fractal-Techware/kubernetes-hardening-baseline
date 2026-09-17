@@ -1,0 +1,16 @@
+# Phase 2: Audit + Warn. Violations are still admitted, but kubectl / CI users
+# see a warning on every apply.
+#   kubectl apply -k overlays/warn
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../policies
+patches:
+  - target:
+      group: policies.kyverno.io
+      kind: ValidatingPolicy
+      labelSelector: ftw.io/enforce=recommended
+    patch: |-
+      - op: replace
+        path: /spec/validationActions
+        value: [Audit, Warn]

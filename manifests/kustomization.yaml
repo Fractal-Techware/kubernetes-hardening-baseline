@@ -1,0 +1,9 @@
+# Hardened namespace baseline: PSA restricted + default-deny NetworkPolicy + hardened workload.
+#   kubectl apply -k manifests      (change "namespace" and the Namespace name first)
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: my-app
+resources:
+  - 00-namespace.yaml
+  - 10-networkpolicy-default-deny.yaml
+  - 20-secure-deployment.yaml

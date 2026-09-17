@@ -1,0 +1,23 @@
+# Namespace with Pod Security Admission (PSA) labels.
+#
+# - enforce: pods that violate the "restricted" profile are REJECTED.
+#   enforce-version is PINNED to the control-plane minor you tested against,
+#   so a cluster upgrade can never silently tighten (and break) admission.
+# - audit / warn: evaluated against "latest", so you see what the NEXT
+#   Kubernetes version's restricted profile would reject (audit log entries +
+#   kubectl warnings) before you bump enforce-version.
+#
+# Safety-first rollout for an EXISTING namespace: apply with only audit/warn
+# labels first (see README, "Rolling out to an existing namespace"), fix
+# warnings, then add the enforce labels.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-app
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: v1.35
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/audit-version: latest
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: latest

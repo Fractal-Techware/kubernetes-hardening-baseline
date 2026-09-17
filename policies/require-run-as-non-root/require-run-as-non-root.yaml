@@ -1,0 +1,71 @@
+# Require runAsNonRoot  (severity: high, rollout: recommended)
+# Ships in Audit mode. Switch to Deny with: kubectl apply -k overlays/enforce
+# Tests: policies/require-run-as-non-root/.kyverno-test/
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: require-run-as-non-root
+  labels:
+    app.kubernetes.io/part-of: ftw-k8s-hardening
+    ftw.io/enforce: recommended
+  annotations:
+    policies.kyverno.io/title: Require runAsNonRoot
+    policies.kyverno.io/category: Pod Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/minversion: 1.19.0
+    ftw.io/benchmark-cis: 5.2 Pod Security Standards - minimize admission of root containers
+    ftw.io/benchmark-nsa-cisa: Kubernetes Pod security - use containers built to run as non-root
+    ftw.io/rollout: Audit >= 7 days -> fix PolicyReport violations -> Warn -> Deny
+    policies.kyverno.io/description: >-
+      Containers must run as a non-root user: runAsNonRoot=true at pod or container level (container overrides
+      pod) and runAsUser must never be 0.
+spec:
+  validationActions:
+  - Audit
+  autogen:
+    podControllers:
+      controllers:
+      - deployments
+      - statefulsets
+      - daemonsets
+      - jobs
+      - cronjobs
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+        - kube-system
+        - kube-public
+        - kube-node-lease
+        - kyverno
+    resourceRules:
+    - apiGroups:
+      - ''
+      apiVersions:
+      - v1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - pods
+  variables:
+  - name: allContainers
+    expression: >-
+      object.spec.containers + object.spec.?initContainers.orValue([]) + object.spec.?ephemeralContainers.orValue([])
+  - name: podRunAsNonRoot
+    expression: object.spec.?securityContext.?runAsNonRoot.orValue(false)
+  validations:
+  - expression: >-
+      variables.allContainers.all(c, c.?securityContext.?runAsNonRoot.orValue(variables.podRunAsNonRoot)
+      == true)
+    message: >-
+      Running as root is not allowed: set securityContext.runAsNonRoot=true on the pod (and do not set
+      it to false on any container).
+  - expression: >-
+      object.spec.?securityContext.?runAsUser.orValue(1) != 0 && variables.allContainers.all(c, c.?securityContext.?runAsUser.orValue(1)
+      != 0)
+    message: >-
+      runAsUser 0 (root) is not allowed: use a non-zero UID such as 10001.

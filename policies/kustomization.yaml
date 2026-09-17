@@ -1,0 +1,10 @@
+# All five policies in Audit mode (report only, nothing is blocked).
+#   kubectl apply -k policies
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - disallow-host-path/disallow-host-path.yaml
+  - disallow-latest-tag/disallow-latest-tag.yaml
+  - disallow-privileged-containers/disallow-privileged-containers.yaml
+  - require-resource-requests-limits/require-resource-requests-limits.yaml
+  - require-run-as-non-root/require-run-as-non-root.yaml

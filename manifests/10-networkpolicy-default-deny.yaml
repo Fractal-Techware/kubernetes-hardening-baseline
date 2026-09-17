@@ -1,0 +1,41 @@
+# Default-deny for ALL ingress and egress of every pod in the namespace,
+# plus the one exception almost every workload needs: DNS to CoreDNS.
+#
+# After applying this, NOTHING can talk to your pods and your pods can talk to
+# nothing except DNS. Add explicit allow policies for each real traffic path
+# (ingress controller, Prometheus scrape, app-to-app, egress to databases/APIs).
+# See the README section "What breaks after default-deny".
+#
+# Requires a CNI that enforces NetworkPolicy (Calico, Cilium, Antrea, ...).
+# kindnet (older kind), flannel and some managed defaults silently ignore it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
