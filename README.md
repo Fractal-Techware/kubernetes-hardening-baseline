@@ -133,7 +133,7 @@ Tested walkthroughs on [https://fractal-techware.github.io/guides/](https://frac
 ## Need the full baseline?
 
 This repository is a free sample of the
-[Kubernetes Hardening Baseline Kit](https://fractaltechware.gumroad.com/l/k8s-hardening-kit?utm_source=github&utm_medium=readme&utm_campaign=free-repo).
+[Kubernetes Hardening Baseline Kit](https://store.fractaltechware.com/l/k8s-hardening-kit?utm_source=github&utm_medium=readme&utm_campaign=free-repo).
 If it is useful, the paid tiers cover the rest of a production rollout:
 
 | | Free (this repo) | Starter $19 | Pro $49 | Studio $99 |
@@ -150,7 +150,7 @@ If it is useful, the paid tiers cover the rest of a production rollout:
 | Audit CLI with JSON / SARIF + GitHub Actions gate | – | – | – | Yes |
 | Rollout runbook, client-use license | – | – | – | Yes |
 
-[Compare tiers on Gumroad](https://fractaltechware.gumroad.com/l/k8s-hardening-kit?utm_source=github&utm_medium=readme&utm_campaign=free-repo)
+[Compare tiers on Gumroad](https://store.fractaltechware.com/l/k8s-hardening-kit?utm_source=github&utm_medium=readme&utm_campaign=free-repo)
 
 ## Contributing & license
 
